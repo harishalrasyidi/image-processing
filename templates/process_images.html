@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Process Face Images</h2>
+    <form action="/process_images/" method="post">
+        <div class="form-group">
+            <label for="selected_person">Select Person:</label>
+            <select class="form-control" id="selected_person" name="selected_person" required>
+                {% for person in persons %}
+                <option value="{{ person }}">{{ person }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Process Images</button>
+    </form>
+
+    {% if show_results %}
+    <div class="mt-5">
+        <h3>Processing Results</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <img src="{{ original_image }}" class="img-fluid" alt="Original">
+                <p class="text-center">Original Image</p>
+            </div>
+            <div class="col-md-3">
+                <img src="{{ noisy_image }}" class="img-fluid" alt="Noisy">
+                <p class="text-center">With Salt & Pepper Noise</p>
+            </div>
+            <div class="col-md-3">
+                <img src="{{ denoised_image }}" class="img-fluid" alt="Denoised">
+                <p class="text-center">After Denoising</p>
+            </div>
+            <div class="col-md-3">
+                <img src="{{ sharpened_image }}" class="img-fluid" alt="Sharpened">
+                <p class="text-center">After Sharpening</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

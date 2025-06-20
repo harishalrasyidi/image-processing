@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>📊 Integral Projection Image Analyzer</h2>
+    <p>Analisis gambar menggunakan teknik Integral Projection (Projection Histogram).</p>
+
+    <form action="/integral_projection/" method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Parameter</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="threshold_type">Jenis Threshold:</label>
+                            <select class="form-select" id="threshold_type" name="threshold_type">
+                                <option value="BINARY">BINARY</option>
+                                <option value="BINARY_INV">BINARY_INV</option>
+                                <option value="OTSU">OTSU</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mt-3" id="threshold_value_group">
+                            <label for="threshold_value">Nilai Threshold:</label>
+                            <input type="range" class="form-range" id="threshold_value" name="threshold_value" 
+                                   min="0" max="255" value="127">
+                            <span id="threshold_value_display">127</span>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="apply_blur" name="apply_blur">
+                                <label class="form-check-label" for="apply_blur">
+                                    Terapkan Gaussian Blur
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3" id="blur_group" style="display: none;">
+                            <label for="blur_kernel_size">Ukuran Kernel Blur:</label>
+                            <input type="range" class="form-range" id="blur_kernel_size" name="blur_kernel_size" 
+                                   min="1" max="15" step="2" value="5">
+                            <span id="blur_kernel_size_display">5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label for="image">Upload Gambar:</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Analisis Gambar</button>
+            </div>
+        </div>
+    </form>
+
+    {% if show_results %}
+    <div class="results mt-4">
+        <h3>Hasil Analisis</h3>
+        <div class="row">
+            <div class="col-12">
+                <img src="{{ main_visualization }}" class="img-fluid" alt="Main Visualization">
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Proyeksi Horizontal (Profil Vertikal)</h4>
+                <div class="card">
+                    <div class="card-body">
+                        <p>Ukuran: {{ h_proj_size }} nilai</p>
+                        <p>Nilai maksimum: {{ h_proj_max }}</p>
+                        <p>Nilai rata-rata: {{ h_proj_mean }}</p>
+                        <img src="{{ h_proj_plot }}" class="img-fluid" alt="Horizontal Projection">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4>Proyeksi Vertikal (Profil Horizontal)</h4>
+                <div class="card">
+                    <div class="card-body">
+                        <p>Ukuran: {{ v_proj_size }} nilai</p>
+                        <p>Nilai maksimum: {{ v_proj_max }}</p>
+                        <p>Nilai rata-rata: {{ v_proj_mean }}</p>
+                        <img src="{{ v_proj_plot }}" class="img-fluid" alt="Vertical Projection">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h4>Tentang Integral Projection</h4>
+            <div class="alert alert-info">
+                <p><strong>Integral Projection (Projection Histogram)</strong> mereduksi dimensi gambar dengan menjumlahkan nilai piksel sepanjang baris atau kolom, menghasilkan profil 1D dari distribusi piksel.</p>
+                
+                <h5>Komponen:</h5>
+                <ul>
+                    <li><strong>Proyeksi Horizontal:</strong> Jumlah per kolom → Profil vertikal</li>
+                    <li><strong>Proyeksi Vertikal:</strong> Jumlah per baris → Profil horizontal</li>
+                </ul>
+
+                <h5>Aplikasi Umum:</h5>
+                <ul>
+                    <li>Segmentasi baris/karakter teks dalam OCR</li>
+                    <li>Deteksi lokasi objek kasar, cropping otomatis</li>
+                    <li>Analisis pola periodik (barcode, partitur musik)</li>
+                </ul>
+
+                <h5>Interpretasi:</h5>
+                <ul>
+                    <li>Puncak dalam proyeksi horizontal menunjukkan kolom dengan banyak piksel objek</li>
+                    <li>Puncak dalam proyeksi vertikal menunjukkan baris dengan banyak piksel objek</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Update threshold value display
+    document.getElementById('threshold_value').addEventListener('input', function(e) {
+        document.getElementById('threshold_value_display').textContent = e.target.value;
+    });
+
+    // Update blur kernel size display
+    document.getElementById('blur_kernel_size').addEventListener('input', function(e) {
+        document.getElementById('blur_kernel_size_display').textContent = e.target.value;
+    });
+
+    // Toggle blur settings visibility
+    document.getElementById('apply_blur').addEventListener('change', function(e) {
+        document.getElementById('blur_group').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // Toggle threshold value visibility based on threshold type
+    document.getElementById('threshold_type').addEventListener('change', function(e) {
+        document.getElementById('threshold_value_group').style.display = 
+            e.target.value === 'OTSU' ? 'none' : 'block';
+    });
+</script>
+{% endblock %} 

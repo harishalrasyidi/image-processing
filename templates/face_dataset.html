@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Add New Face to Dataset</h2>
+    <form action="/add_face/" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="new_person">Person Name:</label>
+            <input type="text" class="form-control" id="new_person" name="new_person" required>
+        </div>
+        <div class="form-group mt-3">
+            <label for="images">Upload Face Images:</label>
+            <input type="file" class="form-control" id="images" name="images" multiple accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Add Face</button>
+    </form>
+</div>
+{% endblock %} 

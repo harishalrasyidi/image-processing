@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Processing Results{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Processing Results</h1>
+
+    <!-- Original Image -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Original Image</h3>
+        </div>
+        <div class="card-body text-center">
+            <img src="{{ results.original }}" class="img-fluid" alt="Original Image">
+        </div>
+    </div>
+
+    <!-- Results for each operation -->
+    {% for operation in operations %}
+        {% if operation == "rgb_display" and results.rgb_array %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>RGB Array Display</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4 class="text-danger">Red Channel</h4>
+                        <pre class="small">{{ results.rgb_array.R | string }}</pre>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-success">Green Channel</h4>
+                        <pre class="small">{{ results.rgb_array.G | string }}</pre>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-primary">Blue Channel</h4>
+                        <pre class="small">{{ results.rgb_array.B | string }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "grayscale" and results.grayscale %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Grayscale Conversion</h3>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ results.grayscale }}" class="img-fluid" alt="Grayscale Image">
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "inverse" and results.inverse %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Inverse Image</h3>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ results.inverse }}" class="img-fluid" alt="Inverse Image">
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "histogram" %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Histogram Analysis</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Grayscale Histogram</h4>
+                        <img src="{{ results.grayscale_histogram }}" class="img-fluid" alt="Grayscale Histogram">
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Color Histogram</h4>
+                        <img src="{{ results.color_histogram }}" class="img-fluid" alt="Color Histogram">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "statistics" and results.statistics %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Image Statistics</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Mean Intensity:</strong> {{ "%.2f"|format(results.statistics.mean) }}</p>
+                <p><strong>Standard Deviation:</strong> {{ "%.2f"|format(results.statistics.std) }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "equalize" and results.equalized %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Histogram Equalization</h3>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ results.equalized }}" class="img-fluid" alt="Equalized Image">
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "canny_edge" and results.edges %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Canny Edge Detection</h3>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ results.edges }}" class="img-fluid" alt="Edge Detection">
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "chain_code" and results.chain_code %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Chain Code Analysis</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Contour Image</h4>
+                        <img src="{{ results.contour_image }}" class="img-fluid" alt="Contour Image">
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Chain Code</h4>
+                        <pre>{{ results.chain_code | join(", ") }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "integral_projection" and results.integral_projection %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Integral Projection</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Horizontal Projection</h4>
+                        <canvas id="horizontalProjection"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Vertical Projection</h4>
+                        <canvas id="verticalProjection"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "convolution" and results.convolution %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Convolution - {{ results.convolution_type }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4>Result</h4>
+                        <img src="{{ results.convolution }}" class="img-fluid" alt="Convolution Result">
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Kernel Matrix</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center">
+                                {% for row in results.kernel %}
+                                <tr>
+                                    {% for val in row %}
+                                    <td>{{ "%.2f"|format(val) }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "padding" and results.padding %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Zero Padding (Size: {{ results.padding_size }})</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <img src="{{ results.padding }}" class="img-fluid" alt="Padded Image">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if operation == "filter" and results.filter %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>{{ results.filter_type }} Filter (Kernel Size: {{ results.filter_kernel_size }}x{{ results.filter_kernel_size }})</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <img src="{{ results.filter }}" class="img-fluid" alt="Filtered Image">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="text-center mt-4 mb-5">
+        <a href="/" class="btn btn-primary">Back to Home</a>
+    </div>
+</div>
+
+{% if "integral_projection" in operations and results.integral_projection %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Plot horizontal projection
+    const hCtx = document.getElementById('horizontalProjection').getContext('2d');
+    new Chart(hCtx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: {{ results.integral_projection.horizontal|length }}}, (_, i) => i),
+            datasets: [{
+                label: 'Horizontal Projection',
+                data: {{ results.integral_projection.horizontal | tojson }},
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        }
+    });
+
+    // Plot vertical projection
+    const vCtx = document.getElementById('verticalProjection').getContext('2d');
+    new Chart(vCtx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: {{ results.integral_projection.vertical|length }}}, (_, i) => i),
+            datasets: [{
+                label: 'Vertical Projection',
+                data: {{ results.integral_projection.vertical | tojson }},
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1
+            }]
+        }
+    });
+</script>
+{% endif %}
+{% endblock %} 

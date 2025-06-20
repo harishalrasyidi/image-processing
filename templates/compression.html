@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Image Compression: Lossy (JPEG) and Lossless (PNG)</h2>
+    <p class="lead">Upload an image to perform compression analysis and quality comparison.</p>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="/compression/" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="image" class="form-label">Select Image (PNG/TIFF)</label>
+                    <input type="file" class="form-control" id="image" name="image" accept=".png,.tiff,.tif" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="method" class="form-label">Compression Method</label>
+                    <select class="form-select" id="method" name="method" required>
+                        <option value="JPEG">JPEG (Lossy)</option>
+                        <option value="PNG">PNG (Lossless)</option>
+                    </select>
+                </div>
+
+                <div id="jpegOptions" class="mb-3">
+                    <label for="jpeg_quality" class="form-label">JPEG Quality</label>
+                    <select class="form-select" id="jpeg_quality" name="jpeg_quality">
+                        <option value="95">95 - Best Quality</option>
+                        <option value="75">75 - Good Quality</option>
+                        <option value="50">50 - Medium Quality</option>
+                        <option value="25">25 - Low Quality</option>
+                        <option value="10">10 - Poor Quality</option>
+                    </select>
+                </div>
+
+                <div id="pngOptions" class="mb-3" style="display: none;">
+                    <label for="png_level" class="form-label">PNG Compression Level</label>
+                    <select class="form-select" id="png_level" name="png_level">
+                        <option value="0">0 - No Compression</option>
+                        <option value="3">3 - Fast</option>
+                        <option value="6">6 - Default</option>
+                        <option value="9">9 - Best Compression</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Compress Image</button>
+            </form>
+        </div>
+    </div>
+
+    {% if result %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Original Image</div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ result.original_image }}" class="img-fluid" alt="Original Image">
+                    <p class="mt-2">Size: {{ result.original_size }} KB</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Compressed Image</div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ result.compressed_image }}" class="img-fluid" alt="Compressed Image">
+                    <p class="mt-2">Size: {{ result.compressed_size }} KB</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">Compression Results</div>
+        <div class="card-body">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Compression Method</th>
+                        <td>{{ result.method }}</td>
+                    </tr>
+                    <tr>
+                        <th>Compression Ratio</th>
+                        <td>{{ result.compression_ratio }}:1</td>
+                    </tr>
+                    <tr>
+                        <th>PSNR</th>
+                        <td>{{ result.psnr }} dB</td>
+                    </tr>
+                    <tr>
+                        <th>SSIM</th>
+                        <td>{{ result.ssim }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if result.comparison_plot %}
+    <div class="card mt-4">
+        <div class="card-header">Quality Comparison</div>
+        <div class="card-body">
+            <img src="data:image/png;base64,{{ result.comparison_plot }}" class="img-fluid" alt="Quality Comparison">
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('method').addEventListener('change', function() {
+    const jpegOptions = document.getElementById('jpegOptions');
+    const pngOptions = document.getElementById('pngOptions');
+    
+    if (this.value === 'JPEG') {
+        jpegOptions.style.display = 'block';
+        pngOptions.style.display = 'none';
+    } else {
+        jpegOptions.style.display = 'none';
+        pngOptions.style.display = 'block';
+    }
+});
+</script>
+{% endblock %} 

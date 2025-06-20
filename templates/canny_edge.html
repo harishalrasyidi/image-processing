@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>🔍 Deteksi Tepi Canny</h2>
+    <p>Upload gambar dan sesuaikan parameter untuk melihat hasilnya.</p>
+
+    <form action="/canny_edge/" method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Parameter Blur</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="kernel_size">Ukuran Kernel Gaussian Blur:</label>
+                            <input type="range" class="form-range" id="kernel_size" name="kernel_size" 
+                                   min="1" max="21" step="2" value="5">
+                            <span id="kernel_size_value">5</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="sigma">Sigma Gaussian Blur:</label>
+                            <input type="range" class="form-range" id="sigma" name="sigma" 
+                                   min="0.1" max="5.0" step="0.1" value="1.0">
+                            <span id="sigma_value">1.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Parameter Canny</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="low_threshold">Ambang Batas Bawah:</label>
+                            <input type="range" class="form-range" id="low_threshold" name="low_threshold" 
+                                   min="0" max="255" value="50">
+                            <span id="low_threshold_value">50</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="high_threshold">Ambang Batas Atas:</label>
+                            <input type="range" class="form-range" id="high_threshold" name="high_threshold" 
+                                   min="0" max="255" value="150">
+                            <span id="high_threshold_value">150</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <input type="file" class="form-control" name="image" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Proses Gambar</button>
+    </form>
+
+    {% if show_results %}
+    <div class="results mt-4">
+        <h3>Hasil Pengolahan</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <img src="{{ original_image }}" class="img-fluid" alt="Original">
+                <p class="text-center">Gambar Asli</p>
+            </div>
+            <div class="col-md-4">
+                <img src="{{ blurred_image }}" class="img-fluid" alt="Blurred">
+                <p class="text-center">Gaussian Blur</p>
+            </div>
+            <div class="col-md-4">
+                <img src="{{ edge_image }}" class="img-fluid" alt="Edges">
+                <p class="text-center">Tepi Canny</p>
+            </div>
+        </div>
+
+        {% if edge_analysis %}
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Statistik Tepi</h4>
+                <ul class="list-group">
+                    <li class="list-group-item">Jumlah piksel tepi: {{ edge_analysis.edge_pixels }}</li>
+                    <li class="list-group-item">Total piksel gambar: {{ edge_analysis.total_pixels }}</li>
+                    <li class="list-group-item">Persentase tepi: {{ "%.2f"|format(edge_analysis.edge_percentage) }}%</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <img src="{{ distribution_chart }}" class="img-fluid" alt="Edge Distribution">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <h3>Tentang Deteksi Tepi Canny</h3>
+        <div class="alert alert-info">
+            <h5>Algoritma Canny bekerja dalam beberapa tahap:</h5>
+            <ol>
+                <li>Reduksi Noise menggunakan Gaussian Blur</li>
+                <li>Kalkulasi Gradien Intensitas (magnitude dan arah)</li>
+                <li>Non-Maximum Suppression untuk mendapat tepi tipis</li>
+                <li>Thresholding Hysteresis menggunakan ambang batas ganda</li>
+            </ol>
+            <h5>Tips Pengaturan Parameter:</h5>
+            <ul>
+                <li>Mulai dengan rasio 1:2 atau 1:3 untuk ambang batas rendah:tinggi</li>
+                <li>Jika terlalu banyak tepi/noise terdeteksi: Naikkan ambang batas atau tingkatkan blur</li>
+                <li>Jika tepi penting hilang: Turunkan ambang batas atau kurangi blur</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update range input values
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+        const valueSpan = document.getElementById(input.id + '_value');
+        input.addEventListener('input', (e) => {
+            valueSpan.textContent = e.target.value;
+        });
+    });
+</script>
+{% endblock %} 

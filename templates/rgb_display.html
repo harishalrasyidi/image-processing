@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>RGB Array Display</h2>
+    <p class="lead">Upload an image to view its RGB array values.</p>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="/rgb_display/" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="image" class="form-label">Select Image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload and Display</button>
+            </form>
+        </div>
+    </div>
+
+    {% if image_path %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Uploaded Image</div>
+                <div class="card-body">
+                    <img src="{{ image_path }}" class="img-fluid" alt="Uploaded Image">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">RGB Array Values</div>
+                <div class="card-body">
+                    <div class="accordion" id="rgbAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#redChannel">
+                                    Red Channel
+                                </button>
+                            </h2>
+                            <div id="redChannel" class="accordion-collapse collapse" data-bs-parent="#rgbAccordion">
+                                <div class="accordion-body">
+                                    <pre class="small" style="max-height: 200px; overflow-y: auto;">{{ rgb_array.R | tojson }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#greenChannel">
+                                    Green Channel
+                                </button>
+                            </h2>
+                            <div id="greenChannel" class="accordion-collapse collapse" data-bs-parent="#rgbAccordion">
+                                <div class="accordion-body">
+                                    <pre class="small" style="max-height: 200px; overflow-y: auto;">{{ rgb_array.G | tojson }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#blueChannel">
+                                    Blue Channel
+                                </button>
+                            </h2>
+                            <div id="blueChannel" class="accordion-collapse collapse" data-bs-parent="#rgbAccordion">
+                                <div class="accordion-body">
+                                    <pre class="small" style="max-height: 200px; overflow-y: auto;">{{ rgb_array.B | tojson }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Home - Image Processing Compilation{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Image Processing Compilation</h1>
+
+    <!-- Single Image Processing Section -->
+    <div class="card mb-5">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Single Image Processing</h3>
+        </div>
+        <div class="card-body">
+            <form action="/process_single/" method="post" enctype="multipart/form-data" class="mb-4">
+                <div class="mb-3">
+                    <label for="single_image" class="form-label">Upload Image:</label>
+                    <input type="file" class="form-control" id="single_image" name="image" accept="image/*" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Select Processing Methods:</label>
+                    <div class="row">
+                        <!-- Basic Operations -->
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header">Basic Operations</div>
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="rgb_display">
+                                        <label class="form-check-label">RGB Display</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="grayscale">
+                                        <label class="form-check-label">Grayscale</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="inverse">
+                                        <label class="form-check-label">Inverse</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analysis -->
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header">Analysis</div>
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="histogram">
+                                        <label class="form-check-label">Histogram</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="statistics">
+                                        <label class="form-check-label">Statistics</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="equalize">
+                                        <label class="form-check-label">Histogram Equalization</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Processing -->
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header">Advanced Processing</div>
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="canny_edge">
+                                        <label class="form-check-label">Canny Edge</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="chain_code">
+                                        <label class="form-check-label">Chain Code</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="integral_projection">
+                                        <label class="form-check-label">Integral Projection</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="convolution">
+                                        <label class="form-check-label">Convolution</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="padding">
+                                        <label class="form-check-label">Zero Padding</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="operations" value="filter">
+                                        <label class="form-check-label">Filter</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Parameters -->
+                    <div class="mt-4">
+                        <div class="card">
+                            <div class="card-header">Additional Parameters</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Arithmetic Operation Value:</label>
+                                        <input type="range" class="form-range" name="arithmetic_value" min="0" max="255" value="50">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Threshold Value:</label>
+                                        <input type="range" class="form-range" name="threshold_value" min="0" max="255" value="127">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Kernel Size:</label>
+                                        <select class="form-select" name="kernel_size">
+                                            <option value="3">3x3</option>
+                                            <option value="5">5x5</option>
+                                            <option value="7">7x7</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Padding Size:</label>
+                                        <input type="number" class="form-control" name="padding_size" min="1" max="50" value="10">
+                                    </div>
+                                </div>
+                                
+                                <!-- Convolution and Filter Parameters -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Convolution Type:</label>
+                                        <select class="form-select" name="kernel_type">
+                                            <option value="average">Average (Blur)</option>
+                                            <option value="sharpen">Sharpen</option>
+                                            <option value="edge">Edge Detection</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Filter Type:</label>
+                                        <select class="form-select" name="filter_type">
+                                            <option value="lowpass">Low Pass</option>
+                                            <option value="highpass">High Pass</option>
+                                            <option value="bandpass">Band Pass</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Process Single Image</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dual Image Processing Section -->
+    <div class="card mb-5">
+        <div class="card-header bg-success text-white">
+            <h3 class="mb-0">Dual Image Processing</h3>
+        </div>
+        <div class="card-body">
+            <form action="/process_dual/" method="post" enctype="multipart/form-data">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First Image:</label>
+                        <input type="file" class="form-control" name="image1" accept="image/*" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Second Image:</label>
+                        <input type="file" class="form-control" name="image2" accept="image/*" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Select Operation:</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Logic Operations</div>
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="dual_operation" value="and">
+                                        <label class="form-check-label">AND</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="dual_operation" value="xor">
+                                        <label class="form-check-label">XOR</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Other Operations</div>
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="dual_operation" value="specify">
+                                        <label class="form-check-label">Histogram Specification</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success">Process Dual Images</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Special Features Section -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Face Processing</h4>
+                </div>
+                <div class="card-body">
+                    <p>Manage and process face datasets with noise reduction and enhancement.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/face_dataset/" class="btn btn-info">Face Dataset Management</a>
+                        <a href="/process_images/" class="btn btn-info">Process Face Images</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">Image Compression</h4>
+                </div>
+                <div class="card-body">
+                    <p>Compress images using various methods and analyze quality metrics.</p>
+                    <div class="d-grid">
+                        <a href="/compression/" class="btn btn-warning">Image Compression Tools</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add any necessary JavaScript for dynamic form behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update range input displays
+        const ranges = document.querySelectorAll('input[type="range"]');
+        ranges.forEach(range => {
+            const output = document.createElement('output');
+            range.parentNode.appendChild(output);
+            output.value = range.value;
+            range.addEventListener('input', () => output.value = range.value);
+        });
+    });
+</script>
+{% endblock %}

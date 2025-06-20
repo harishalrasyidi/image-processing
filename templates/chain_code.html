@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>🔗 Freeman Chain Code Generator</h2>
+    <p>Upload gambar dan sesuaikan parameter untuk menghasilkan kode rantai Freeman 8-arah.</p>
+
+    <form action="/chain_code/" method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Parameter</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="threshold_type">Jenis Threshold:</label>
+                            <select class="form-select" id="threshold_type" name="threshold_type">
+                                <option value="BINARY">BINARY</option>
+                                <option value="BINARY_INV">BINARY_INV</option>
+                            </select>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="threshold_value">Nilai Threshold:</label>
+                            <input type="range" class="form-range" id="threshold_value" name="threshold_value" 
+                                   min="0" max="255" value="127">
+                            <span id="threshold_value_display">127</span>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="contour_mode">Mode Kontur:</label>
+                            <select class="form-select" id="contour_mode" name="contour_mode">
+                                <option value="RETR_EXTERNAL">RETR_EXTERNAL</option>
+                                <option value="RETR_LIST">RETR_LIST</option>
+                                <option value="RETR_CCOMP">RETR_CCOMP</option>
+                                <option value="RETR_TREE">RETR_TREE</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label for="image">Upload Gambar:</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Generate Chain Code</button>
+            </div>
+        </div>
+    </form>
+
+    {% if show_results %}
+    <div class="results mt-4">
+        <h3>Hasil Pengolahan</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <img src="{{ original_image }}" class="img-fluid" alt="Original">
+                <p class="text-center">Gambar Asli</p>
+            </div>
+            <div class="col-md-4">
+                <img src="{{ binary_image }}" class="img-fluid" alt="Binary">
+                <p class="text-center">Gambar Biner</p>
+            </div>
+            <div class="col-md-4">
+                <img src="{{ contour_image }}" class="img-fluid" alt="Contours">
+                <p class="text-center">Kontur Terdeteksi</p>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Kode Rantai Freeman</h4>
+                <div class="card">
+                    <div class="card-body">
+                        <p>Panjang kontur: {{ contour_length }} titik</p>
+                        <p>Panjang kode rantai: {{ chain_code_length }}</p>
+                        <textarea class="form-control" rows="5" readonly>{{ chain_code }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4>Histogram Kode Rantai</h4>
+                <img src="{{ histogram_image }}" class="img-fluid" alt="Chain Code Histogram">
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h4>Interpretasi Kode Arah</h4>
+            <div class="alert alert-info">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li>0: ke kanan (timur)</li>
+                            <li>1: ke kanan atas (timur laut)</li>
+                            <li>2: ke atas (utara)</li>
+                            <li>3: ke kiri atas (barat laut)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li>4: ke kiri (barat)</li>
+                            <li>5: ke kiri bawah (barat daya)</li>
+                            <li>6: ke bawah (selatan)</li>
+                            <li>7: ke kanan bawah (tenggara)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Update threshold value display
+    document.getElementById('threshold_value').addEventListener('input', function(e) {
+        document.getElementById('threshold_value_display').textContent = e.target.value;
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+jinja2
+opencv-python-headless
+python-multipart
+numpy
+matplotlib
+scikit-image 
