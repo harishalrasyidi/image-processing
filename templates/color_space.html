@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Color Space Conversion</h2>
+    <form action="/color_space/" method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="form-group">
+            <label for="image">Select Image:</label>
+            <input type="file" class="form-control-file" id="image" name="image" required>
+        </div>
+        <div class="form-group">
+            <label for="color_space">Select Color Space:</label>
+            <select class="form-control" id="color_space" name="color_space" required>
+                <option value="xyz">XYZ</option>
+                <option value="lab">LAB</option>
+                <option value="ycbcr">YCbCr</option>
+                <option value="yiq">YIQ</option>
+                <option value="yuv">YUV</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Convert</button>
+    </form>
+
+    {% if original_image %}
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Original Image</h4>
+            <img src="data:image/png;base64,{{ original_image }}" class="img-fluid">
+        </div>
+        <div class="col-md-6">
+            <h4>Converted Image</h4>
+            <img src="data:image/png;base64,{{ converted_image }}" class="img-fluid">
+        </div>
+    </div>
+    {% endif %}
+
+    {% if components %}
+    <div class="row mt-4">
+        {% for component in components %}
+        <div class="col-md-4">
+            <h4>{{ component.title }}</h4>
+            <img src="data:image/png;base64,{{ component.image }}" class="img-fluid">
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

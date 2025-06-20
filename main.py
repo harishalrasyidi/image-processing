@@ -11,6 +11,8 @@ from typing import List
 import io
 import base64
 from skimage.metrics import structural_similarity as ssim
+import matplotlib
+matplotlib.use('Agg')
 
 app = FastAPI()
 
@@ -1154,4 +1156,119 @@ async def process_dual_images(
         "results": results,
         "operation": dual_operation
     })
+
+def rgb_to_yiq(rgb):
+    """
+    Convert RGB to YIQ using transformation matrix.
+    """
+    transform_matrix = np.array([[0.299, 0.587, 0.114],
+                               [0.59590059, -0.27455667, -0.32134392],
+                               [0.21153661, -0.52273617, 0.31119955]])
+    yiq = np.dot(rgb, transform_matrix.T)
+    yiq = (yiq - np.min(yiq)) / (np.max(yiq) - np.min(yiq))  # Normalize
+    return yiq
+
+def plot_to_base64(fig):
+    """
+    Convert a matplotlib figure to base64 string.
+    """
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    return base64.b64encode(buf.getvalue()).decode()
+
+def normalize_and_encode(image):
+    """
+    Normalize image and convert to base64.
+    """
+    normalized = cv2.normalize(image, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    _, buffer = cv2.imencode('.png', normalized)
+    return base64.b64encode(buffer).decode()
+
+@app.get("/color_space/", response_class=HTMLResponse)
+async def color_space_form(request: Request):
+    return templates.TemplateResponse("color_space.html", {"request": request})
+
+@app.post("/color_space/", response_class=HTMLResponse)
+async def convert_color_space(
+    request: Request,
+    image: UploadFile = File(...),
+    color_space: str = Form(...)
+):
+    # Read and process the image
+    contents = await image.read()
+    nparr = np.frombuffer(contents, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Convert image to selected color space and get components
+    components = []
+    converted_image = None
+
+    if color_space == "xyz":
+        converted_image = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2XYZ)
+        X, Y, Z = cv2.split(converted_image)
+        components = [
+            {"title": "X Component", "image": normalize_and_encode(X)},
+            {"title": "Y Component (Luminance)", "image": normalize_and_encode(Y)},
+            {"title": "Z Component", "image": normalize_and_encode(Z)}
+        ]
+
+    elif color_space == "lab":
+        converted_image = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2Lab)
+        L, a, b = cv2.split(converted_image)
+        components = [
+            {"title": "L Component (Luminance)", "image": normalize_and_encode(L)},
+            {"title": "a Component (Green-Red)", "image": normalize_and_encode(a)},
+            {"title": "b Component (Blue-Yellow)", "image": normalize_and_encode(b)}
+        ]
+
+    elif color_space == "ycbcr":
+        converted_image = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2YCrCb)
+        Y, Cr, Cb = cv2.split(converted_image)
+        components = [
+            {"title": "Y Component (Luminance)", "image": normalize_and_encode(Y)},
+            {"title": "Cb Component (Blue Chrominance)", "image": normalize_and_encode(Cb)},
+            {"title": "Cr Component (Red Chrominance)", "image": normalize_and_encode(Cr)}
+        ]
+
+    elif color_space == "yiq":
+        converted_image = rgb_to_yiq(img_rgb / 255.0)
+        Y = converted_image[:, :, 0]
+        I = converted_image[:, :, 1]
+        Q = converted_image[:, :, 2]
+        components = [
+            {"title": "Y Component (Luminance)", "image": normalize_and_encode((Y * 255).astype(np.uint8))},
+            {"title": "I Component (In-phase)", "image": normalize_and_encode((I * 255).astype(np.uint8))},
+            {"title": "Q Component (Quadrature)", "image": normalize_and_encode((Q * 255).astype(np.uint8))}
+        ]
+
+    elif color_space == "yuv":
+        converted_image = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2YUV)
+        Y, U, V = cv2.split(converted_image)
+        components = [
+            {"title": "Y Component (Luminance)", "image": normalize_and_encode(Y)},
+            {"title": "U Component", "image": normalize_and_encode(U)},
+            {"title": "V Component", "image": normalize_and_encode(V)}
+        ]
+
+    # Convert original and converted images to base64
+    _, buffer = cv2.imencode('.png', cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR))
+    original_image = base64.b64encode(buffer).decode()
+
+    if color_space != "yiq":
+        _, buffer = cv2.imencode('.png', converted_image)
+        converted_image_base64 = base64.b64encode(buffer).decode()
+    else:
+        converted_image_base64 = normalize_and_encode((converted_image * 255).astype(np.uint8))
+
+    return templates.TemplateResponse(
+        "color_space.html",
+        {
+            "request": request,
+            "original_image": original_image,
+            "converted_image": converted_image_base64,
+            "components": components
+        }
+    )
 
